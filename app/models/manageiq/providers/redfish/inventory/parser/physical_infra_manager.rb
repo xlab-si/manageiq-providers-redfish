@@ -48,13 +48,20 @@ module ManageIQ::Providers::Redfish
           :description        => s.Description,
           :location           => format_location(location),
           :location_led_state => s.IndicatorLED,
+          :machine_type       => machine_type(s),
           :manufacturer       => s.Manufacturer,
           :model              => s.Model,
+          :product_name       => s.Name,
           :rack_name          => location.dig("Placement", "Rack"),
           :resource           => server,
+          :room               => location.dig("PostalAddress", "Room"),
           :serial_number      => s.SerialNumber,
         )
       end
+    end
+
+    def machine_type(server)
+      server.Processors.Members[0].InstructionSet
     end
 
     def get_server_location(server)
@@ -71,7 +78,7 @@ module ManageIQ::Providers::Redfish
     end
 
     def format_location(location)
-      %w(HouseNumber Street City Country).collect do |field|
+      %w(Building HouseNumber Street City Country).collect do |field|
         location.dig("PostalAddress", field)
       end.compact.join(", ")
     end
@@ -80,12 +87,48 @@ module ManageIQ::Providers::Redfish
       collector.physical_servers.each do |s|
         server = persister.physical_servers.lazy_find(s["@odata.id"])
         computer = persister.computer_systems.lazy_find(server)
-        persister.hardwares.build(
+        hardware = persister.hardwares.build(
           :computer_system => computer,
           :cpu_total_cores => get_server_cpu_core_count(s),
           :disk_capacity   => get_server_disk_capacity(s),
           :memory_mb       => get_server_memory_mb(s),
         )
+        s.NetworkInterfaces.Members.each do |net_iface|
+          net_adapter = net_iface.Links.NetworkAdapter
+          persister.nics.build(
+            :hardware     => hardware,
+            :device_name  => net_adapter.Name,
+            :device_type  => "ethernet",  # NOTE(@tadeboro): KEEP THIS INTACT!!
+            :manufacturer => net_adapter.Manufacturer,
+            :model        => net_adapter.Model,
+            :uid_ems      => net_adapter["@odata.id"],
+          )
+        end
+        s.Storage.Members.each do |storage|
+          (storage.StorageControllers || []).each do |controller|
+            persister.storage_adapters.build(
+              :hardware     => hardware,
+              :device_name  => controller.Name,
+              :device_type  => "storage",  # NOTE(@tadeboro): KEEP THIS INTACT!!
+              :manufacturer => controller.Manufacturer,
+              :model        => controller.Model,
+              :uid_ems      => controller["@odata.id"],
+            )
+          end
+        end
+
+        # I am definitely going to hell for this ...
+        RedfishClient::Resource.new(
+          s.instance_variable_get(:@connector),
+          oid: "/redfish/v1/UpdateService",
+        ).FirmwareInventory.Members.each do |firmware|
+          persister.firmwares.build(
+            :resource     => hardware,
+            :build        => firmware.SoftwareId,
+            :name         => firmware.Name,
+            :version      => firmware.Version,
+          )
+        end
       end
     end
 
