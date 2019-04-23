@@ -93,7 +93,8 @@ module ManageIQ::Providers::Redfish
           :disk_capacity   => get_server_disk_capacity(s),
           :memory_mb       => get_server_memory_mb(s),
         )
-        s.NetworkInterfaces.Members.each do |net_iface|
+        # Next hack is placed there for SuperMicro
+        (s.NetworkInterfaces&.Members || []).each do |net_iface|
           net_adapter = net_iface.Links.NetworkAdapter
           persister.nics.build(
             :hardware     => hardware,
@@ -118,10 +119,11 @@ module ManageIQ::Providers::Redfish
         end
 
         # I am definitely going to hell for this ...
-        RedfishClient::Resource.new(
+        fws = RedfishClient::Resource.new(
           s.instance_variable_get(:@connector),
           oid: "/redfish/v1/UpdateService",
-        ).FirmwareInventory.Members.each do |firmware|
+        ).FirmwareInventory&.Members || []
+        fws.each do |firmware|
           persister.firmwares.build(
             :resource     => hardware,
             :build        => firmware.SoftwareId,
