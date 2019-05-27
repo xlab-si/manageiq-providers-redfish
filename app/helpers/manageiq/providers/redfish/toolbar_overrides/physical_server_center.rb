@@ -28,6 +28,22 @@ module ManageIQ::Providers::Redfish
               }
             ),
             button(
+              :physical_server_firmware_update,
+              "pficon pficon-maintenance fa-lg",
+              t = N_("Update Firmware of Physical Server"),
+              t,
+              :klass => ApplicationHelper::Button::ButtonWithoutRbacCheck,
+              :data  => {
+                "function"      => "sendDataWithRx",
+                "function-data" => {
+                  :controller     => "provider_dialogs",
+                  :button         => :physical_server_firmware_update,
+                  :modal_title    => N_("Update Physical Server Firmware"),
+                  :component_name => "RedfishServerFirmwareUpdateDialog",
+                }.to_json,
+              }
+            ),
+            button(
               :physical_server_bios_update,
               "pficon pficon-edit fa-lg",
               t = N_("Update BIOS on Physical Server"),
@@ -42,7 +58,7 @@ module ManageIQ::Providers::Redfish
                   :component_name => "RedfishServerBiosUpdateDialog",
                 }.to_json,
               }
-            )
+            ),
           ]
         ),
       ]
