@@ -16,6 +16,17 @@ export const createProvisionRequest = (physicalServerIds, pxeImageId, templateId
   response['results'].forEach(res => window.add_flash(res.message, res.status === 'Ok' ? 'success' : 'error'));
 });
 
+export const createBiosUpdateRequest = (physicalServerIds, config) => API.post(`/api/requests`, {
+  options: {
+    request_type: 'physical_server_bios_update',
+    src_ids: physicalServerIds,
+    config: config
+  },
+  auto_approve: true
+}).then(response => {
+  response['results'].forEach(res => window.add_flash(res.message, res.status === 'Ok' ? 'success' : 'error'));
+});
+
 export const handleApiError = (self) => {
   return (err) => {
     let msg = __('Unknown API error');

@@ -27,6 +27,22 @@ module ManageIQ::Providers::Redfish
                 }.to_json,
               }
             ),
+            button(
+              :physical_server_bios_update,
+              "pficon pficon-edit fa-lg",
+              t = N_("Update BIOS on Physical Server"),
+              t,
+              :klass => ApplicationHelper::Button::ButtonWithoutRbacCheck,
+              :data  => {
+                "function"      => "sendDataWithRx",
+                "function-data" => {
+                  :controller     => "provider_dialogs",
+                  :button         => :physical_server_bios_update,
+                  :modal_title    => N_("Physical Server BIOS Update"),
+                  :component_name => "RedfishServerBiosUpdateDialog",
+                }.to_json,
+              }
+            )
           ]
         ),
       ]
