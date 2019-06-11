@@ -39,6 +39,7 @@ const BiosUpdate = ({loading, updateFormState, physicalServerIds, initialValues}
                   validate={required({ msg: 'BIOS Configuration is required' })}
                   labelColumnSize={12}
                   inputColumnSize={12}
+                  rows={20}
                   searchable
                 />
               </Col>
