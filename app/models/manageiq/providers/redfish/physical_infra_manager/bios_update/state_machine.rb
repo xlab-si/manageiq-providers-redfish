@@ -48,17 +48,6 @@ module ManageIQ::Providers::Redfish::PhysicalInfraManager::BiosUpdate::StateMach
         "@Redfish.SettingsApplyTime" => { "ApplyTime" => "OnReset" },
         "Attributes"                 => attributes
       })
-
-      # Settings Once and BiosSetup in once PATCH call breaks on Dell.
-      system.patch(:payload => {
-        "Boot" => {
-          "BootSourceOverrideEnabled" => "Once",
-          "BootSourceOverrideTarget"  => "Pxe"
-        }
-      })
-      system.patch(:payload => {
-        "Boot" => { "BootSourceOverrideTarget" => "BiosSetup" }
-      })
     end
     source.power_up
 
