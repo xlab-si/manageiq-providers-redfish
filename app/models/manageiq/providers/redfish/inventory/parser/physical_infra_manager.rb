@@ -118,12 +118,11 @@ module ManageIQ::Providers::Redfish
           end
         end
 
-        # I am definitely going to hell for this ...
-        fws = RedfishClient::Resource.new(
-          s.instance_variable_get(:@connector),
-          oid: "/redfish/v1/UpdateService",
-        ).FirmwareInventory&.Members || []
-        fws.each do |firmware|
+        collector.firmware_inventory.each do |firmware|
+          # RelatedItem is actually an array and is not a typo.
+          related = firmware.RelatedItem || []
+          next unless related.find { |r| r["@odata.id"] == s["@odata.id"] }
+
           persister.firmwares.build(
             :resource     => hardware,
             :build        => firmware.SoftwareId,
