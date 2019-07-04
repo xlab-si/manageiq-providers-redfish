@@ -16,10 +16,10 @@ class RedfishServerFirmwareUpdateDialog extends React.Component {
   }
 
   selectedPhysicalServers = async () => {
-    if(ManageIQ.record.recordId){ // Single-record page
-      await this.setState({physicalServerIds: [ManageIQ.record.recordId]});
-    } else if(ManageIQ.gridChecks.length > 0){ // Multi-record page
+    if(ManageIQ.gridChecks.length > 0){ // Multi-record page
       await this.setState({physicalServerIds: ManageIQ.gridChecks});
+    } else if(ManageIQ.record.recordId){ // Single-record page
+      await this.setState({physicalServerIds: [ManageIQ.record.recordId]});
     } else{
       await this.setState({physicalServerIds: [], error: __('Please select at lest one physical server to update firmware for.')});
     }

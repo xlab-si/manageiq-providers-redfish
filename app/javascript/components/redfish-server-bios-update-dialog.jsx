@@ -15,10 +15,10 @@ class RedfishServerBiosUpdateDialog extends React.Component {
   }
 
   selectedPhysicalServers = () => {
-    if(ManageIQ.record.recordId){ // Single-record page
-      this.setState({physicalServerIds: [ManageIQ.record.recordId]});
-    } else if(ManageIQ.gridChecks.length > 0){ // Multi-record page
+    if(ManageIQ.gridChecks.length > 0){ // Multi-record page
       this.setState({physicalServerIds: ManageIQ.gridChecks});
+    } else if(ManageIQ.record.recordId){ // Single-record page
+      this.setState({physicalServerIds: [ManageIQ.record.recordId]});
     } else{
       this.setState({physicalServerIds: [], error: __('Please select at lest one physical server to provision.')});
     }
